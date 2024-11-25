@@ -1,0 +1,80 @@
+>>Processes: isolated, independently executing programs to which the operating system allocates resources such as memory, file
+             handles, and security credentials.(Advantages: resource utilization, fairness, and convenience)
+
+>>Threads allow multiple streams of program control flow to coexist within a process. They share process-wide resources such as memory and file handles, but
+  each thread has its own program counter, (call)stack, and local variables.
+
+>>Threads also provide a natural decomposition for exploiting hardware parallelism on multiprocessor systems; multiple threads within the same program can be scheduled
+  simultaneously on multiple CPUs. Threads are sometimes called lightweight processes, and most modern operating systems treat threads, not processes, as the basic units of scheduling.
+
+>>Threads share the memory address space of their owning process, all threads within a process have access to the same
+  variables and allocate objects from the same heap, which allows finer-grained data sharing than inter-process mechanisms.
+
+>>Without explicit synchronization to coordinate access to shared data, a thread may modify variables that another
+  thread is in the middle of using, with unpredictable results.
+
+>>Remote Method Invocation. RMI lets you invoke methods on objects running in another JVM.
+
+>>A Thread object represents a thread of execution; you’ll create an instance of class Thread each time you want to start up a new thread
+  of execution.
+
+>>Every Java application starts up a main(by JVM) thread—the thread that puts the main() method on the bottom of the stack.
+
+>>Actually we get a "feeling" that multiple threads are executing simultaneously. But what JVM does is switch rapidly between call stacks of different threads and runs what is at top of call stack.
+
+>>One of the things a thread must do is keep track of which statement (of which method) is currently executing on the thread’s stack.
+
+>>Launching a new thread:
+    >Make a Runnable object(the threads "job", if no job thread just dies)-> Runnable threadJob= new MyRunnable();
+    >Make a Thread object(the worker) and give it Runnable(the job)->Thread myThread=new Thread(threadJob); At bottom of the thread's call stack will be run() method.
+    >Start the thread. myThread.start();
+
+>>Every Thread needs a job to do. A method to put on the new thread stack. A Runnable holds the method that goes on the bottom of the new thread’s stack: run().
+    >The Runnable interface defines only one method, public void run();
+    >When you pass a Runnable to a Thread constructor, you’re really just giving the Thread a way to get to a run() method. You’re giving
+     the Thread its job to do.
+
+>> public class MyRunnable implements Runnable{
+    public void run(){ go() };
+    public void go(){//Thread.sleep(200) to print back in main thread first
+    doMore()};
+    public void doMore(){ System.out.println("Top o' the stack") };
+    }//Good programmer separates the work and the worker.
+    class ThreadTest{
+
+    Runnable threadJob = new MyRunnable();
+    Thread myThread=new Thread(threadJob);
+
+    myThread.start();
+    sout("Back in main thread");
+
+    }
+
+>>Three states of a new thread:
+    >New: Thread t = new Thread(r);
+    >Runnable: t.start(); Ready to start and waiting for execution turn.JVM decides!
+    >Running: In the running state, a thread (and ONLY this thread) has an active call stack,and the method on the top of the stack is executing.
+    >But there’s more. Once the thread becomes runnable, it can move back and forth between runnable, running, and an additional state:
+     temporarily not runnable (also known as ‘blocked’). Decide by threadScheduler.
+
+>>A thread can be made temporarily not-runnable, some reasons:
+    >The thread might be executing code to read from a Socket input stream,but there isn’t any data to read. The
+     scheduler will move the thread out of the running state until something becomes available.
+    >The executing code might have told the thread to put itself to sleep (sleep()).
+    >The thread might be waiting because it tried to call a method on an object,and that object was ‘locked’.
+
+>>The Thread Scheduler: The thread scheduler makes all the decisions about who moves from runnable to running, and about when (and under what circumstances) a thread leaves the running state. Can't control.
+    >sleep(): Putting a thread to sleep, even for a few milliseconds, forces the currently-running thread to leave the running state, thus giving another thread a chance to run.
+    >Put your thread to sleep if you want to be sure that other threads get a chance to run.
+    >All you need to do is call the static sleep() method, passing it the sleep duration, in milliseconds.
+    >When the thread wakes up, it always goes back to the runnable state!
+
+>> Use the synchronized keyword to modify a method so that only one thread at a time can access it.
+    >When an object has one or more synchronized methods, a thread can enter a synchronized
+     method only if the thread can get the key to the object’s lock!
+    >Synchronization is expensive. Do only required.
+    >Can be done at granular level.
+>>DeadLock: Thread A needs a lock which Thread B has and B has a lock that Thread A has.
+
+
+

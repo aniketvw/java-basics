@@ -1,0 +1,38 @@
+>>To connect to another machine, we need a Socket connection.
+
+>>A Socket ( java.net.Socket class) is an object that represents
+  a network connection between two machines.
+
+>>Connection is a relationship between two machines, where two
+  pieces of software know about each other. Most importantly,
+  those two pieces of software know how to communicate with
+  each other.
+
+>>To make socket connection we need IP address and TCP port number.
+  (A TCP port is just a number.A 16-bit number that identifies
+   a specific program on the server).65536 ports max. IP address is a
+   mall, Port number is specific store in mall.
+
+>>The TCP port numbers from 0 to 1023 are reserved for well-known services. Don’t
+  use them for your own server programs!
+
+>>To read data from a Socket, use a BufferedReader:
+    >Make a socket connection to server-> Socket chatSocket=new Socket("IP",Port);
+    >Make InputStreamReader to read from socket-> InputStreamReader stream=new InputStreamReader(chatSocket.getInputStream());
+    >Maker BufferedReader and read-> BufferedReader reader=new BufferedReader(stream); String message=reader.readLine();
+
+>>To print data to a Socket, use a PrintWriter:
+    >Make a socket connection to server-> Socket chatSocket=new Socket("IP",Port);
+    >Use PrintWriter to write to the socket->PrintWriter writer = new PrintWriter(chatSocket.getOutputStream());
+    >Write something-> writer.println("Message");
+
+>>How to write a Server:
+    >Server application makes a ServerSocket, on a specific port-> ServerSocket serverSock = new ServerSocket(4242);
+    >Server makes a new Socket to communicate with client-> Socket sock = serverSock.accept();
+    >The accept() method blocks (just sits there) while it’s waiting for a client Socket connection. When a
+     client finally tries to connect, the method returns a plain old Socket (on a different port) that knows
+     how to communicate with the client (i.e., knows the client’s IP address and port number). The Socket is on
+     a different port than the ServerSocket, so that the ServerSocket can go back to waiting for other clients
+
+
+
