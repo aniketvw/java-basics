@@ -1,0 +1,193 @@
+>>Things an object knows about itself are called : Instance Variables
+
+>>Things an object can do are called: Methods
+
+>>A class is a blueprint for an object.
+
+>>Variables come in two flavors: primitive and object reference.
+
+>>  byte:8 bits -128 to 127
+    short: 16 bits -32768 to 32767
+    int/float: 32 bits
+    long/double: 64 bits
+
+>>There’s only an object reference variable.An object reference variable holds bits that represent away to access an object.
+
+>>The 3 steps of object declaration, creation and assignment: Dog myDog=new Dog();
+    Dog myDog-> Tells JVM to allocate space for reference variable.
+    new Dog()-> Tells JVM to allocate space for new Dog object on the heap
+    = -> Link the object and reference
+
+>>Primitive array will hold a primitive, while object array will hold references to the objects.
+
+>>A method uses parameters. A caller passes arguments.
+
+>>Java is pass-by-value. That means pass-by-copy.
+
+>>Mark instance variables private.Mark getters and setters public.
+
+>>Instance variables always get a default value. If you don’t explicitly assign a value to an instance
+  variable, or you don’t call a setter method, the instance variable still has a value!
+
+>>Local variables do NOT get a default value! The compiler complains if you try to use a local variable before
+  the variable is initialized.
+
+>>Use "==" to compare two primitives, or to see if two references refer to the same object. Use the equals()
+  method to see if two different objects are equal.(Such as two different String objects that both represent the characters in “Fred”)
+
+>>Inherited classes can use the same implemented methods of abstract class or override them.(IS-A relationship)
+
+>>Subclass can add new methods and instance variables of its own, and it can override the methods it inherits from the superclass.
+
+>>Instance variables are not overridden.
+
+>>Use superclass version of a method as well as overridden: public void roam(){super.roam();//other stuff}
+
+>>Public members are inherited, private members are not inherited.
+
+>>With polymorphism, the reference and the object can be different. Animal myDog = new Dog(); (reference variable and object is of different type).
+  Animal array can have any subclass of Animal.
+
+>>You can have polymorphic arguments and return types. Means I can write my code, go on vacation, and someone else can add new
+subclass types to the program and my methods will still work.
+
+    class Vet{
+    public void giveShot(Animal a){
+        a.makeNoise();
+        }
+    }
+
+    class PetOwner{
+
+    public void start(){
+        Vet v = new Vet();
+        Dog d = new Dog();
+        Hippo h = new Hippo();
+        v.giveShot(d);
+        v.giveShot(h);
+                       }
+    }
+
+>>Nobody, ever, can extend a final class. Private classes are not there. Private constructor classes can't be extended.
+
+>>If you want to protect a specific method from being overridden, mark the method with the final modifier.
+
+>>Method overriding rules: Arguments must be the same, and return types must be compatible.
+                           The method can’t be less accessible.
+
+>>Overloading a method: Method overloading is nothing more than having two methods with the same name but different
+                        argument lists.
+
+>>Method overloading rules: The return types can be different.
+                            You can’t change ONLY the return type.
+                            You can vary the access levels in any direction.
+
+>>By marking the class as abstract, the compiler will stop any code, anywhere, from ever creating an instance of
+  that type.(We need an Animal class, for inheritance and polymorphism. But we want programmers to instantiate only the less
+  abstract subclasses of class Animal, not Animal itself).
+
+>>You can still use that abstract type as a reference type for the purpose of polymorphism.
+
+>>abstract public class Canine extends Animal{
+            public void roam();
+            }
+   public class MakeCanine{
+
+        public void go(){
+
+            Canine c;
+            c=new Dog();
+            c=new Canine()//wrong!! compilation error
+            c.roam;
+
+        }
+
+   }
+
+>>An abstract class means the class must be extended; an abstract method means the method must be overridden.
+
+>>public abstract void eat();
+
+>>If you declare an abstract method, you MUST mark the class abstract as well. You can’t have
+  an abstract method in a non-abstract class.
+
+>>The point of an abstract method is that even though you haven’t put in any actual method code, you’ve still defined part of
+  the protocol for a group of subtypes (subclasses).
+  >Which is good because: Polymorphism! Remember, what you want is the ability to use a superclass type (often abstract) as a method
+                          argument, return type, or array type. That way, you get to add new subtypes (like a new Animal subclass) to your program without having to rewrite (or add) new methods
+                          to deal with those new types. Imagine how you’d have to change the Vet class, if it didn’t use Animal as its argument
+                          type for methods. You’d have to have a separate method for every single Animal subclass! One that takes a Lion, one that
+                          takes a Wolf, one that takes a... you get the idea. So with an abstract method, you’re saying, “All subtypes of this type
+                          have THIS method.” for the benefit of polymorphism
+
+>>You MUST implement all abstract methods.
+
+>>Every class in Java extends class Object.
+
+>>Any class that doesn’t explicitly extend another class, implicitly extends Object. In Inheritance highest class extends Object directly others indirectly.
+
+>>The compiler decides whether you can call a method based on the reference type, not the actual object type.
+
+>>No multiple inheritance in Java. Deadly diamond. How do we handle the Animal/Pet thing?
+
+>>A Java interface is like a 100% pure abstract class.
+
+>>You can pass anything that implements that interface.(Polymorphism)
+
+>>Classes from different inheritance trees can implement the same interface.
+
+>>A class can implement multiple interfaces!
+
+---
+
+>>Objects live on Heap and method invocations.local variables live on Stack.
+
+>>If the local variable is a reference to an object, only the variable (the reference/remote control) goes on the stack.The object itself still goes on heap.
+
+>> Constructor: same name as class name, no return type.
+
+>>All the constructors in an object’s inheritance tree must run when you make a new object.
+
+>>The keyword static lets a method run without any instance of the class. A static method means
+  “behavior not dependent on an instance variable, so no instance/object is required. Just the class.”
+
+>>Call a static method using a class name, Call a non-static method using a reference variable name.
+
+>>Static methods can’t use non-static (instance) variables!
+
+>>Static variable: value is the same for ALL instances of the class.
+
+    public class Duck {
+   private int size;
+   private static int duckCount = 0;
+
+   public Duck() {
+   duckCount++;
+   }
+A Duck object doesn’t keep its own copy
+of duckCount. Because duckCount is static, Duck objects all share a single copy of it. You can think
+of a static variable as a variable that lives in a CLASS instead of in an object
+
+Each Duck object has its own size variable, but there’s only one copy of the duckCount variable—the one in the class.
+
+>>Static variables are shared. All instances of the same class share a single copy of the static variables
+
+>>instance variables: 1 per instance static variables: 1 per class
+
+>>All static variables in a class are initialized before any object of that class can be created.
+  Static variables in a class are initialized before any static method of the class runs.
+
+>>static final variables are constants
+
+>>A static initializer is a block of code that runs when a class is loaded, before any other code can use the
+  class, so it’s a great place to initialize a static final variable.
+  class Foo {
+   final static int X;
+   static {
+   X = 42;
+   }
+  }
+
+>>Initialize a final static variable: At the time you declare it. / In a static initializer
+
+
