@@ -1,0 +1,136 @@
+>> long count = words.stream().filter(w-> w.length()>12).count();
+   The stream method yields a stream for the words list. The filter method returns another stream that contains only the words of length greater than twelve. The count
+   method reduces that stream to a result.
+
+>> 1. A stream does not store its elements. They may be stored in an underlying
+   collection or generated on demand.
+   2. Stream operations don’t mutate their source. Instead, they return new streams
+   that hold the result.
+   3. Stream operations are lazy when possible. This means they are not executed
+   until their result is needed. For example, if you only ask for the first five long
+   words instead of counting them all, then the filter method will stop filtering
+   after the fifth match. As a consequence, you can even have infinite streams!
+
+>>Streams follow the “what, not how” principle.
+
+>>Stream creations: Stream<String> words=Stream.of(Array);/ Arrays.stream(Array)
+    >Stream<String> echos = Stream.generate(() -> "Echo");
+    >Stream<Double> randoms = Stream.generate(Math::random);
+    >Stream<String> words = Pattern.compile("[\\P{L}]+").splitAsStream(contents);
+    >The static "Files.lines" method returns a Stream of all lines in a file
+    :try (Stream<String> lines = Files.lines(path)) {
+     Do something with lines
+     }
+
+>>Filter/Map/FlatMAp:
+    >The argument of filter is a Predicate<T>—that is, a function from T to boolean.
+    >Often, you want to transform the values in a stream in some way. Use the map method and pass the function that carries out the transformation.
+                Stream<String> lowercaseWords = words.map(String::toLowerCase);
+                Stream<Character> firstChars = words.map(s -> s.charAt(0));
+    >When you use map, a function is applied to each element, and the return values are collected in a new stream.
+    >Suppose that you have a function that returns not just one value but a stream of values, such as this one:
+      public static Stream<Character> characterStream(String s) {
+       List<Character> result = new ArrayList<>();
+       for (char c : s.toCharArray()) result.add(c);
+       return result.stream();
+      }
+    For example, characterStream("boat") is the stream ['b', 'o', 'a', 't']. Suppose you
+    map this method on a stream of strings:
+    Stream<Stream<Character>> result = words.map(w -> characterStream(w));
+    You will get a stream of streams, like [... ['y', 'o', 'u', 'r'], ['b', 'o', 'a', 't'],
+    ...] To flatten it out to a stream of characters [... 'y', 'o', 'u', 'r', 'b', 'o', 'a',
+    't', ...], use the flatMap method instead of map:
+    Stream<Character> letters = words.flatMap(w -> characterStream(w))
+     // Calls characterStream on each word and flattens the results
+    > Reduces levels
+
+>>Extracting SubStreams and CombiningStreams:
+  >stream.limit(n) returns a new stream that ends after n elements (or when the original stream ends if it is shorter).
+  >This method is particularly useful for cutting infinite streams down to size. For example,
+   Stream<Double> randoms = Stream.generate(Math::random).limit(100);
+   yields a stream with 100 random numbers.
+  >The call stream.skip(n) does the exact opposite. It discards the first n elements.
+   This is handy in our book reading example where, due to the way the split
+   method works, the first element is an unwanted empty string. We can make it
+   go away by calling skip:
+   Stream<String> words = Stream.of(contents.split("[\\P{L}]+")).skip(1);
+  >You can concatenate two streams with the static concat method of the Stream class:
+   Stream<Character> combined = Stream.concat(
+    characterStream("Hello"), characterStream("World"));
+    // Yields the stream ['H', 'e', 'l', 'l', 'o', 'W', 'o', 'r', 'l', 'd']
+
+>>Stateful Transformations:
+    >The distinct method returns a stream that yields elements from the original
+     stream, in the same order, except that duplicates are suppressed. The stream
+     must obviously remember the elements that it has already seen.
+    >The sorted method must see the entire stream and sort it before it can give out
+     any element.
+    >Stream<String> longestFirst = words.sorted(Comparator.comparing(String::length).reversed());
+    >The Collections.sort method sorts a collection in place, whereas
+     Stream.sorted returns a new sorted stream.
+
+
+
+>>Simple Reductions: Reductions are terminal operations.
+    >count,max,min. All return Optional<T> value.
+    >Optional<String> largest = words.max(String::compareToIgnoreCase);
+     if (largest.isPresent())
+      System.out.println("largest: " + largest.get());
+    >Optional<String> startsWithQ
+      = words.filter(s -> s.startsWith("Q")).findFirst();
+    >Optional<String> startsWithQ
+      = words.parallel().filter(s -> s.startsWith("Q")).findAny();
+    >boolean aWordStartsWithQ
+      = words.parallel().anyMatch(s -> s.startsWith("Q"));
+
+>> Optional Type:An Optional<T> object is either a wrapper for an object of type T or for no object. It
+                 is intended as a safer alternative than a reference of type T that refers to an object
+                 or null. But it is only safer if you use it right.
+    >The key to using Optional effectively is to use a method that either consumes the
+     correct value or produces an alternative.
+    >If the optional value exists, it is passed to that function. Otherwise, nothing happens.
+     Instead of using an if statement, you call
+     optionalValue.ifPresent(v -> Process v); eg: optionalValue.ifPresent(v -> results.add(v)); or optionalValue.ifPresent(results::add);
+    >Often, there is a default that you want to use
+     when there was no match, perhaps the empty string:
+     String result = optionalString.orElse("");
+      // The wrapped string, or "" if none
+     You can also invoke code to compute the default,
+     String result = optionalString.orElseGet(() -> System.getProperty("user.dir"));
+      // The function is only called when needed
+     Or, if you want to throw another exception if there is no value,
+     String result = optionalString.orElseThrow(NoSuchElementException::new);
+      // Supply a method that yields an exception object
+    >If you write a method that creates an Optional object, there are
+     several static methods for that purpose. Either create an Optional.of(result) or
+     Optional.empty(). For example,
+     public static Optional<Double> inverse(Double x) {
+      return x == 0 ? Optional.empty() : Optional.of(1 / x);
+     }
+     The ofNullable method is intended as a bridge from the use of null values to optional values. Optional.ofNullable(obj) returns Optional.of(obj) if obj is not null, and
+     Optional.empty() otherwise.
+>> Composing Optional Value Functions with flatMap:
+
+>> Reduction Ops:
+    >If you want to compute a sum, or combine the elements of a stream to a result
+     in another way, you can use one of the reduce methods.
+    >The simplest form takes a binary function and keeps applying it, starting with the first two elements.
+    >Stream<Integer> values = ...;
+     Optional<Integer> sum = values.reduce((x, y) -> x + y)//values.reduce(Integer::sum)
+     In this case, the reduce method computes v0 + v1 + v2 + . . . , where the vi are the
+     stream elements. The method returns an Optional because there is no valid result
+     if the stream is empty.
+    >Hard part later
+
+>>Collecting:
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,106 @@
+>> Simple Lambda: (String first, String second)->Integer.compare(first.length(),second.length());
+        >If the code carries out a computation that doesn’t fit in a single expression, write it exactly like you would have written a method:
+        (String first, String second) -> {
+         if (first.length() < second.length()) return -1;
+         else if (first.length() > second.length()) return 1;
+         else return 0;
+        }
+        >If a lambda expression has no parameters, you still supply empty parentheses,just as with a parameterless method:
+         () -> { for (int i = 0; i < 1000; i++) doWork(); }
+        >If the parameter types of a lambda expression can be inferred, you can omit them.
+         Comparator<String> comp= (first, second) // Same as (String first, String second)
+         -> Integer.compare(first.length(), second.length());
+        >If a method has a single parameter with inferred type, you can even omit the
+         parentheses:
+         EventHandler<ActionEvent> listener = event ->
+          System.out.println("Thanks for clicking!");
+          // Instead of (event) -> or (ActionEvent event) ->
+         >You never specify the result type of a lambda expression. It is always inferred from context
+         >It is illegal for a lambda expression to return a value in some branches
+          but not in others. For example, (int x) -> { if (x >= 0) return 1; } is invalid.should have else return also;
+
+>>Functional Interface: You can supply a lambda expression whenever an object of an interface with a
+                        single abstract method is expected. Such an interface is called a functional interface.
+                        Arrays.sort(wordArray,(first,second)->Integer.compare(first.length(),second.length()));
+                        Instead of implementing the Comparator interface and sendin it to sort().
+                        note: Polymorphism-> As some class implements comparator it can also be passed as comparator.
+
+>>You can’t even assign a lambda expression to a variable of type. Object—Object is not a functional interface.
+
+>>Eg: BiFunction<String, String, Integer> comp = (first, second) -> Integer.compare(first.length(), second.length());
+
+>>Method References: The expression System.out::println is a method reference that is equivalent to the
+                     lambda expression x -> System.out.println(x).
+                     Eg: Arrays.sort(strings, String::compareToIgnoreCase)
+
+>>There are three principal cases:
+  • object::instanceMethod
+  • Class::staticMethod
+  • Class::instanceMethod
+
+>>In the first two cases, the method reference is equivalent to a lambda expression that supplies the parameters of the method.
+  In the third case, the first parameter becomes the target of the method. For example, String::compareToIgnoreCase is the same as (x, y) -> x.compareToIgnoreCase(y).
+
+>>You can capture the this parameter in a method reference. For example,this::equals is the same as x -> this.equals(x). It is also valid to use super. The method expression
+  super::instanceMethod
+  uses this as the target and invokes the superclass version of the given method.
+  Here is an artificial example that shows the mechanics:
+  class Greeter {
+   public void greet() {
+   System.out.println("Hello, world!");
+   }
+  }
+  class ConcurrentGreeter extends Greeter {
+   public void greet() {
+   Thread t = new Thread(super::greet);
+   t.start();
+   }
+  }
+
+>>Constructor references are just like method references, except that the name of
+  the method is new.
+
+>>Don’t count on the compiler to catch all concurrent access errors.The prohibition
+against mutation only holds for local variables. If matches is an instance or static
+variable of an enclosing class, then no error is reported, even though the result
+is just as undefined.
+
+>>The code of the lambda expression may run long after the call to repeatMessage has returned and
+  the parameter variables are gone.A lambda expression has three ingredients:
+  1. A block of code
+  2. Parameters
+  3. Values for the free variables, that is, the variables that are not parameters and
+  not defined inside the code
+  public static void repeatMessage(String text, int count) {
+     Runnable r = () -> {
+     for (int i = 0; i < count; i++) {
+     System.out.println(text);
+     //count --; is illegal
+     Thread.yield();
+     }
+     };
+     new Thread(r).start();
+  }
+  Two free variables: text & count. The data structure representing the lambda expression must store the values for these
+  variables, in our case, "Hello" and 1000. We say that these values have been captured by the lambda expression.
+ >In Java, to ensure that the captured value is well-defined, there is an important restriction. In a lambda expression, you can only reference
+  variables whose value doesn’t change.
+
+>>It is illegal to declare a parameter or a local variable in the lambda that has the same name as a local variable.
+
+>>Default methods: interface methods with concrete implementations. Those methods can be safely added to existing interfaces.
+  Implementing class can override the default method or keep it as is.
+
+>>What happens if the exact same method is defined as a default method in one
+  interface and then again as a method of a superclass or another interface?
+  1. Superclasses win. If a superclass provides a concrete method, default methods
+  with the same name and parameter types are simply ignored.
+  2. Interfaces clash. If a superinterface provides a default method, and another
+  interface supplies a method with the same name and parameter types (default
+  or not), then you must resolve the conflict by overriding that method.
+
+>> w consider a class that extends a superclass and implements an interface, inheriting the same
+   method from both: In that case, only the superclass method matters, and any default method from
+                     the interface is simply ignored.
+
+>>

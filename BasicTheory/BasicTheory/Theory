@@ -190,4 +190,6 @@ Each Duck object has its own size variable, but there’s only one copy of the d
 
 >>Initialize a final static variable: At the time you declare it. / In a static initializer
 
+---
+>>Functional Interface Comparator: method int compare(T o1,T o2);
 

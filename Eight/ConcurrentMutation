@@ -1,0 +1,75 @@
+Consider a sequence of concurrent tasks, each updating a shared
+counter.
+int matches = 0;
+for (Path p : files)
+ new Thread(() -> { if (p has some property) matches++; }).start();
+ // Illegal to mutate matches. Why is this non atomic
+ChatGPT said:
+ChatGPT
+The mutation of the shared counter matches in this scenario is not atomic due to the following reasons:
+
+1. Lack of Atomicity in matches++
+The operation matches++ is not a single atomic instruction. It can be broken down into three steps:
+
+Read: Read the current value of matches.
+Increment: Add 1 to the value.
+Write: Write the new value back to matches.
+In a multithreaded context, multiple threads can perform these steps concurrently, leading to race conditions. For example:
+
+Thread A reads matches as 5.
+Thread B reads matches as 5.
+Both threads increment their local value to 6.
+Both threads write 6 back to matches.
+The correct result (7) is lost, and matches ends up being incremented only once instead of twice.
+
+2. No Synchronization Mechanism
+In your code, there is no mechanism (like synchronized blocks, locks, or atomic operations) to ensure that the steps of matches++ happen in a mutually exclusive manner. Without synchronization, threads can interleave in arbitrary ways, leading to inconsistent updates to matches.
+
+3. Visibility Issues
+Without proper synchronization, threads may not see the latest value of matches due to the Java Memory Model (JMM). Each thread could work with a cached value of matches, and updates might not be propagated to the main memory immediately.
+
+Making matches Update Atomic
+To fix this issue, you can use one of the following approaches:
+
+1. Use AtomicInteger
+The AtomicInteger class provides atomic operations for integers.
+
+java
+Copy code
+AtomicInteger matches = new AtomicInteger(0);
+for (Path p : files) {
+    new Thread(() -> {
+        if (/* p has some property */) matches.incrementAndGet();
+    }).start();
+}
+2. Use synchronized
+Synchronize the update to matches.
+
+java
+Copy code
+int matches = 0;
+Object lock = new Object();
+for (Path p : files) {
+    new Thread(() -> {
+        if (/* p has some property */) {
+            synchronized (lock) {
+                matches++;
+            }
+        }
+    }).start();
+}
+3. Use a Parallel Stream (Recommended for Simpler Code)
+Use Java streams to parallelize the task and handle the counting in a thread-safe manner.
+
+java
+Copy code
+long matches = files.parallelStream()
+                    .filter(p -> /* p has some property */)
+                    .count();
+The first two approaches ensure atomic updates but require careful handling of concurrency. The third approach leverages Java's built-in parallelism and is often the simplest and most maintainable solution.
+
+
+
+
+
+
