@@ -1,0 +1,8 @@
+>The point of all lambdas is deferred execution.
+
+>Running code only when necessary is a use case for lambdas.
+
+>logger.info(() -> "x: " + x + ", y:" + y) //logger.info("x: " + x + ", y: " + y); this will
+compute the string and throw it away if info logging is disabled.
+
+>
